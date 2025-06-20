@@ -1,4 +1,4 @@
-# generator
+# Generator
 ランダムに問題を生成してJSONファイルに出力
 
 使用ライブラリ：

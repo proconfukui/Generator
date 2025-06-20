@@ -2,6 +2,7 @@ package proconfukui;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
@@ -12,8 +13,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 
 public class Main {
 	static Scanner scanner = new Scanner(System.in);
-	static final String path = "/Users/utautage/output.json"; // 環境に応じて書き換える
-	public static void main(String[] args) throws IOException {
+	static final String path = "/Users/utautage/problem.json"; // 環境に応じて書き換える
+	public static void main(String[] args) {
 		int size = 0;
 		do {
 			System.out.print("フィールドのサイズ(4~24の偶数)? ");
@@ -28,29 +29,34 @@ public class Main {
 			entities.add(number);
 		}
 		Collections.shuffle(entities);
-		JsonGenerator generator = new JsonFactory().createGenerator(new File(path), JsonEncoding.UTF8);
-		generator.useDefaultPrettyPrinter();
-		generator.writeStartObject();
-		generator.writeNumberField("startsAt", 0);
-		generator.writeFieldName("problem");
-		generator.writeStartObject();
-		generator.writeFieldName("field");
-		generator.writeStartObject();
-		generator.writeNumberField("size", size);
-		generator.writeFieldName("entities");
-		generator.writeStartArray();
-		for (int y = 0; y < size; y++) {
+		JsonGenerator generator;
+		try {
+			generator = new JsonFactory().createGenerator(new File(path), JsonEncoding.UTF8);
+			generator.useDefaultPrettyPrinter();
+			generator.writeStartObject();
+			generator.writeNumberField("startsAt", Instant.now().getEpochSecond());
+			generator.writeFieldName("problem");
+			generator.writeStartObject();
+			generator.writeFieldName("field");
+			generator.writeStartObject();
+			generator.writeNumberField("size", size);
+			generator.writeFieldName("entities");
 			generator.writeStartArray();
-			for (int x = 0; x < size; x++) {
-				generator.writeNumber(entities.get(y * size + x));
+			for (int y = 0; y < size; y++) {
+				generator.writeStartArray();
+				for (int x = 0; x < size; x++) {
+					generator.writeNumber(entities.get(y * size + x));
+				}
+				generator.writeEndArray();
 			}
 			generator.writeEndArray();
+			generator.writeEndObject();
+			generator.writeEndObject();
+			generator.writeEndObject();
+			generator.flush();
+			System.out.println(path + " に書き込み完了");
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		generator.writeEndArray();
-		generator.writeEndObject();
-		generator.writeEndObject();
-		generator.writeEndObject();
-		generator.flush();
-		System.out.println(path + " に書き込み完了");
 	}
 }
