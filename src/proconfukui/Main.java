@@ -2,9 +2,6 @@ package proconfukui;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Scanner;
 
 import com.fasterxml.jackson.core.JsonEncoding;
@@ -14,7 +11,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 public class Main {
 	static Scanner scanner = new Scanner(System.in);
 	static final String path = "/Users/utautage/problem.json"; // 環境に応じて書き換える
-	public static void main(String[] args) {
+	
+	public static void main(String[] args) throws IOException {
 		int size = 0;
 		do {
 			System.out.print("フィールドのサイズ(4~24の偶数)? ");
@@ -23,40 +21,37 @@ public class Main {
 				size = Integer.parseInt(input);
 			} catch (NumberFormatException e) {}
 		} while (size % 2 != 0 || size < 4 || size > 24);
-		ArrayList<Integer> entities = new ArrayList<Integer>(size * size);
-		for (int number = 1; number <= size * size / 2; number++) {
-			entities.add(number);
-			entities.add(number);
+		int[] entities = new int[size * size];
+		for (int index = 0; index < size * size; index += 2) {
+			entities[index] = index / 2 + 1;
+			entities[index + 1] = index / 2 + 1;
 		}
-		Collections.shuffle(entities);
+		for (int index1 = 0; index1 < size * size; index1++) {
+			int index2 = (int)(Math.random() * size * size);
+			int temp = entities[index1];
+			entities[index1] = entities[index2];
+			entities[index2] = temp;
+		}
 		JsonGenerator generator;
-		try {
-			generator = new JsonFactory().createGenerator(new File(path), JsonEncoding.UTF8);
-			generator.useDefaultPrettyPrinter();
-			generator.writeStartObject();
-			generator.writeNumberField("startsAt", Instant.now().getEpochSecond());
-			generator.writeFieldName("problem");
-			generator.writeStartObject();
-			generator.writeFieldName("field");
-			generator.writeStartObject();
-			generator.writeNumberField("size", size);
-			generator.writeFieldName("entities");
-			generator.writeStartArray();
-			for (int y = 0; y < size; y++) {
-				generator.writeStartArray();
-				for (int x = 0; x < size; x++) {
-					generator.writeNumber(entities.get(y * size + x));
-				}
-				generator.writeEndArray();
-			}
-			generator.writeEndArray();
-			generator.writeEndObject();
-			generator.writeEndObject();
-			generator.writeEndObject();
-			generator.flush();
-			System.out.println(path + " に書き込み完了");
-		} catch (IOException e) {
-			e.printStackTrace();
+		generator = new JsonFactory().createGenerator(new File(path), JsonEncoding.UTF8);
+		generator.useDefaultPrettyPrinter();
+		generator.writeStartObject();
+		generator.writeNumberField("startsAt", 0);
+		generator.writeFieldName("problem");
+		generator.writeStartObject();
+		generator.writeFieldName("field");
+		generator.writeStartObject();
+		generator.writeNumberField("size", size);
+		generator.writeFieldName("entities");
+		generator.writeStartArray();
+		for (int y = 0; y < size; y++) {
+			generator.writeArray(entities, y * size, size);
 		}
+		generator.writeEndArray();
+		generator.writeEndObject();
+		generator.writeEndObject();
+		generator.writeEndObject();
+		generator.flush();
+		System.out.println(path + " に書き込み完了");
 	}
 }
