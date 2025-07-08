@@ -23,8 +23,8 @@ public class Main {
 		} while (size % 2 != 0 || size < 4 || size > 24);
 		int[] entities = new int[size * size];
 		for (int index = 0; index < size * size; index += 2) {
-			entities[index] = index / 2 + 1;
-			entities[index + 1] = index / 2 + 1;
+			entities[index] = index / 2;
+			entities[index + 1] = index / 2;
 		}
 		for (int index1 = 0; index1 < size * size; index1++) {
 			int index2 = (int)(Math.random() * size * size);
